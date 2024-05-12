@@ -1,7 +1,8 @@
 """This module uses the DFS and BFS algorithms to find paths in the graph"""
 
-import networkx as nx
 import argparse
+from collections import deque
+import networkx as nx
 
 
 graph = {
@@ -15,22 +16,38 @@ graph = {
 G = nx.Graph(graph)
 
 
-# DFS function
-dfs_tree = nx.dfs_tree(G, source="Kyiv")
-# [('Kyiv', 'Lutsk'), ('Lutsk', 'Lviv'), ('Lviv', 'Warsaw'), ('Warsaw', 'Munich'), ('Munich', 'Vienna')]
+def dfs_tree(graph, vertex, visited=None):
+    """Depth first search function"""
+    if visited is None:
+        visited = set()
+    visited.add(vertex)
+    print(vertex)
+    for neighbor in graph[vertex]:
+        if (visited is not None) and (neighbor not in visited):
+            dfs_tree(graph, neighbor, visited)
 
-# BFS function
-bfs_tree = nx.bfs_tree(G, source="Kyiv")
-# [('Kyiv', 'Lutsk'), ('Kyiv', 'Lviv'), ('Kyiv', 'Warsaw'), ('Kyiv', 'Vienna'), ('Warsaw', 'Munich')]
+
+def bfs_tree(graph, queue, visited=None):
+    """Breadth first search function"""
+    if visited is None:
+        visited = set()
+    if not queue:
+        return
+    vertex = queue.popleft()
+    if vertex not in visited:
+        print(vertex)
+        visited.add(vertex)
+        queue.extend(set(graph[vertex]) - visited)
+    bfs_tree(graph, queue, visited)
 
 
 def search_graph(algo_name: str):
     """Distinguish between DFS and BFS user input and call the respective algorythm func"""
     if algo_name == "dfs":
-        print("Pathes found:", list(dfs_tree.edges()))
+        dfs_tree(G, "Kyiv")
 
     elif algo_name == "bfs":
-        print("Pathes found:", list(bfs_tree.edges()))
+        bfs_tree(G, deque(["Kyiv"]))
 
     else:
         print("Such algorythm doesn't exist")
