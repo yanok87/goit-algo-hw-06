@@ -1,41 +1,40 @@
 """This module implement Dijkstra's algorithm"""
 
-import networkx as nx
-import matplotlib.pyplot as plt
+# Define the graph as a dictionary with nodes as keys and their neighbors and weights as values
+
+graph = {
+    "Kyiv": {"Lutsk": 4, "Lviv": 5, "Warsaw": 16, "Vienna": 25},
+    "Lutsk": {"Kyiv": 4, "Lviv": 2, "Warsaw": 9},
+    "Lviv": {"Kyiv": 5, "Lutsk": 2, "Warsaw": 8},
+    "Warsaw": {"Kyiv": 16, "Lutsk": 9, "Lviv": 8, "Munich": 16},
+    "Vienna": {"Kyiv": 25, "Munich": 4},
+    "Munich": {"Vienna": 4, "Warsaw": 16},
+}
 
 
-G = nx.Graph()
+def dijkstra(graph, start):
+    """Dijkstra algorithm to find the shortest pathes"""
+    # Initialize distances from the start node to all other nodes as infinity
+    distances = {node: float("inf") for node in graph}
+    # Distance from the start node to itself is 0
+    distances[start] = 0
+    # Initialize an empty set to keep track of visited nodes
+    visited = set()
 
-# Travel Graph creation with the edges weight (travel time)
-G.add_edge("Kyiv", "Lutsk", weight=4)
-G.add_edge("Kyiv", "Lviv", weight=5)
-G.add_edge("Kyiv", "Warsaw", weight=16)
-G.add_edge("Kyiv", "Vienna", weight=25)
-G.add_edge("Lutsk", "Lviv", weight=2)
-G.add_edge("Lutsk", "Warsaw", weight=9)
-G.add_edge("Lviv", "Warsaw", weight=8)
-G.add_edge("Vienna", "Munich", weight=4)
-G.add_edge("Munich", "Warsaw", weight=16)
+    while len(visited) < len(graph):
+        # Find the node with the smallest distance from the start node
+        current_node = min(
+            (node for node in graph if node not in visited), key=lambda x: distances[x]
+        )
+        visited.add(current_node)
+        # Update distances to neighbors of the current node
+        for neighbor, weight in graph[current_node].items():
+            if distances[current_node] + weight < distances[neighbor]:
+                distances[neighbor] = distances[current_node] + weight
+
+    return distances
 
 
-# Visualise travel graph
-pos = nx.spring_layout(G, seed=42)
-nx.draw(
-    G, pos, with_labels=True, node_size=700, node_color="skyblue", font_size=15, width=2
-)
-labels = nx.get_edge_attributes(G, "weight")
-nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
-
-plt.show()
-
-# Find the shortest pathes between all cities
-shortest_paths = {}
-for start_node in G.nodes():
-    shortest_paths[start_node] = {}
-    for end_node in G.nodes():
-        if start_node != end_node:
-            shortest_paths[start_node][end_node] = nx.dijkstra_path_length(
-                G, start_node, end_node
-            )
-
-print(shortest_paths)
+shortest_paths_from_kyiv = dijkstra(graph, "Kyiv")
+print("Shortest paths from Kyiv:")
+print(shortest_paths_from_kyiv)
